@@ -141,23 +141,25 @@ export const createUser = async (req, res) => {
     const result = await User.create(creationData);
     console.log("new user added");
 
-    console.log("Updating coordinator portfolio...");
-    const coordinator = await User.findByIdAndUpdate(creatorId, {
-      $push: { subMembers: result.phoneNumber },
-    });
+    if (creatorId !== "superAdmin") {
+      console.log("Updating coordinator portfolio...");
+      const coordinator = await User.findByIdAndUpdate(creatorId, {
+        $push: { subMembers: result.phoneNumber },
+      });
 
-    const incentiveTransaction = await createTransactionEntry({
-      amount: 1,
-      accountId: coordinator.mainSavingsAccount,
-      remark: `Member Creation Incentive ${phoneNumber}`,
-      kind: "credit",
-      breakDown: [],
-      source: "Society",
-      method: "internal",
-      proof: "N/A",
-    });
+      const incentiveTransaction = await createTransactionEntry({
+        amount: 1,
+        accountId: coordinator.mainSavingsAccount,
+        remark: `Member Creation Incentive ${phoneNumber}`,
+        kind: "credit",
+        breakDown: [],
+        source: "Society",
+        method: "internal",
+        proof: "N/A",
+      });
 
-    console.log("Done", incentiveTransaction);
+      console.log("Done", incentiveTransaction);
+    }
 
     await Sequence.findOneAndUpdate(
       { name: "member" },
