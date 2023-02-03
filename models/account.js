@@ -17,6 +17,7 @@ const personalInfoSchema = new Schema({
 
 const AccountSchema = new Schema(
   {
+    _id: String,
     accountHolderDetails: { type: personalInfoSchema, required: true },
     accountNumber: { type: String, required: true },
     userId: { type: String, requried: true },
@@ -28,17 +29,19 @@ const AccountSchema = new Schema(
     credits: { type: [transactionSchema], required: true },
     debits: { type: [transactionSchema], required: true },
     creatorId: { type: String, required: true },
-    initalAmount: { type: Number },
+    principalAmounts: { type: [Number] },
     balance: { type: Number, reqruied: true },
-    matureAmount: { type: Number },
+    duration: { type: Number },
     matureDate: { type: Date },
     interestApplicable: {
       type: [String],
-      reqruied: true,
+      required: true,
     },
+    monthlyAmount: { type: Number },
+    monthlyDate: { type: String },
     isActive: { type: Boolean, requried: true },
   },
-  { timeseries: true }
+  { timestamps: true }
 );
 
 export default mongoose.model("Account", AccountSchema);

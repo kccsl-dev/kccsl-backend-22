@@ -3,9 +3,9 @@ import Sequence from "../models/sequence.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {
-  createAccount,
+  createAccountUtil,
   createTransactionEntry,
-  updateAccount,
+  updateAccountUtil,
 } from "../middleware/finance";
 
 export const getUsers = async (req, res) => {
@@ -71,10 +71,11 @@ export const createUser = async (req, res) => {
 
     const hashed = await bcrypt.hash("password", 12);
 
-    const memberSequqnce = (await Sequence.find({ name: "member" }))[0];
-    const memberId = memberSequqnce.value;
-    const shareSequence = (await Sequence.find({ name: "shares" }))[0];
-    const currentShareNumber = shareSequence.value;
+    const sequence = await Sequence.findOne();
+    console.log(sequence);
+    const memberId = sequence.member;
+    console.log(memberId);
+    const currentShareNumber = sequence.shares;
     const newShareNumber = currentShareNumber + noOfShares - 1;
 
     const shares = [];
@@ -101,21 +102,26 @@ export const createUser = async (req, res) => {
       balance: 0,
     };
     console.log("Creating savings account...");
-    const mainSavingsAccount = await createAccount({
-      ...accountDetails,
-      accountNumber: `S${memberId}`,
-      type: "s",
-      isActive: true,
-    });
+    console.log(`s${memberId}`, memberId);
+    const mainSavingsAccount = await createAccountUtil(
+      {
+        ...accountDetails,
+        type: "s",
+        isActive: true,
+      },
+      `s${memberId}`
+    );
     console.log("Done: " + mainSavingsAccount._id);
 
     console.log("Creating collection account...");
-    const collectionAccount = await createAccount({
-      ...accountDetails,
-      accountNumber: `C${memberId}`,
-      type: "c",
-      isActive: false,
-    });
+    const collectionAccount = await createAccountUtil(
+      {
+        ...accountDetails,
+        type: "c",
+        isActive: false,
+      },
+      `c${memberId}`
+    );
     console.log("Done: " + collectionAccount._id);
 
     console.log("Creating user...");
@@ -161,15 +167,11 @@ export const createUser = async (req, res) => {
       console.log("Done", incentiveTransaction);
     }
 
-    await Sequence.findOneAndUpdate(
-      { name: "member" },
-      { value: memberId + 1 }
-    );
+    await Sequence.findOneAndUpdate({
+      member: memberId + 1,
+      shares: currentShareNumber + noOfShares + 1,
+    });
     console.log("Member sequence updated");
-    await Sequence.findOneAndUpdate(
-      { name: "shares" },
-      { value: newShareNumber + 1 }
-    );
     console.log("Shares sequence updated");
     res.status(200).json({ result });
   } catch (error) {
@@ -191,7 +193,7 @@ export const updateMember = async (req, res) => {
     }
     console.log(data);
 
-    await updateAccount(user.mainSavingsAccount, { isActive: true });
+    await updateAccountUtil(user.mainSavingsAccount, { isActive: true });
     const updatedUser = await User.findByIdAndUpdate(phoneNumber, {
       ...data,
     });
@@ -219,7 +221,7 @@ export const makeCoordinator = async (req, res) => {
       return;
     }
 
-    await updateAccount(user.collectionAccount, { isActive: true });
+    await updateAccountUtil(user.collectionAccount, { isActive: true });
     const updatedUser = await User.findByIdAndUpdate(phoneNumber, {
       coordinatorId: `C${user.memberId}`,
       roles: [...user.roles, "coordinator"],
@@ -229,6 +231,21 @@ export const makeCoordinator = async (req, res) => {
       subAccounts: [],
     });
     console.log(phoneNumber, "made coordinator");
+    console.log("granting incentive");
+    const coordinator = await User.findById(converterId);
+    if (updatedUser.creatorId !== "superAdmin") {
+      const incentiveTransaction = await createTransactionEntry({
+        amount: 500,
+        accountId: coordinator.mainSavingsAccount,
+        remark: `coordinator making incentive ${phoneNumber}`,
+        kind: "credit",
+        source: "society",
+        method: "internal",
+        breakDown: "null",
+        proof: "null",
+      });
+      console.log("incentive granted", incentiveTransaction);
+    }
     res.status(200).json(updatedUser);
     res.status(200);
   } catch (error) {

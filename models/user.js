@@ -8,6 +8,7 @@ const addressSchema = new Schema({
   district: { type: String },
   block: { type: String },
   tehsil: { type: String },
+  pincode: { type: String },
 });
 
 const personalInfoSchema = new Schema({

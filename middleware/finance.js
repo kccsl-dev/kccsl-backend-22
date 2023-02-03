@@ -1,17 +1,34 @@
 import Account from "../models/account.js";
 import Interest from "../models/interest";
+import Sequence from "../models/sequence.js";
 import Transaction from "../models/transaction";
 
-export const createAccount = async (accountDetails) => {
+export const createAccountUtil = async (accountDetails, id) => {
   try {
-    const newAccount = await Account.create({ ...accountDetails });
+    console.log("Util: creating account");
+    console.log(accountDetails);
+    const sequence = await Sequence.findOne();
+    const currentNumber = sequence[accountDetails.type];
+    const accountNumber = id || accountDetails.type + currentNumber;
+    const newAccount = await Account.create({
+      ...accountDetails,
+      accountNumber: accountNumber,
+      _id: accountNumber,
+    });
+    console.log("Util: done");
+    if (accountDetails.type !== "s" && accountDetails.type !== "c") {
+      await Sequence.findOneAndUpdate({
+        [accountDetails.type]: currentNumber + 1,
+      });
+    }
+    console.log("updated sequence");
     return newAccount;
   } catch (error) {
     console.log(error);
   }
 };
 
-export const updateAccount = async (id, updatedDetails) => {
+export const updateAccountUtil = async (id, updatedDetails) => {
   try {
     const updatedAccount = Account.findByIdAndUpdate(id, { ...updatedDetails });
     return updatedAccount;
@@ -83,14 +100,14 @@ export const createTransactionEntry = async (args) => {
     });
     if (kind === "credit") {
       const newBalance = account.balance + amount;
-      await updateAccount(account._id, {
+      await updateAccountUtil(account._id, {
         balance: newBalance,
         credits: [...account.credits, newTransaction],
       });
       console.log("Credit created");
     } else if (kind === "debit") {
       const newBalance = account.balance - amount;
-      await updateAccount(account._id, {
+      await updateAccountUtil(account._id, {
         balance: newBalance,
         debits: [...account.debits, newTransaction],
       });
@@ -98,5 +115,8 @@ export const createTransactionEntry = async (args) => {
     }
     console.log("transaction complete");
     return newTransaction;
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
 };

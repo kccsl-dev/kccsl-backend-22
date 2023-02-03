@@ -6,9 +6,11 @@ import userRouter from "./routes/user.js";
 import locationRouter from "./routes/locationData.js";
 import transactionRouter from "./routes/transaction.js";
 import accountRouter from "./routes/account.js";
-import interestRouter from "./routes/interest";
+import interestRouter from "./routes/interest.js";
+import demandRouter from "./routes/demand.js";
 import { GenerateDBs } from "./utils/createData.js";
 import * as dotenv from "dotenv";
+import { SequenceId } from "./utils/createData.js";
 dotenv.config();
 const app = express();
 
@@ -21,6 +23,7 @@ app.use("/location", locationRouter);
 app.use("/account", accountRouter);
 app.use("/transaction", transactionRouter);
 app.use("/interest", interestRouter);
+app.use("/demand", demandRouter);
 
 const databaseURI = process.env.DATABASE_URI;
 const PORT = process.env.PORT;

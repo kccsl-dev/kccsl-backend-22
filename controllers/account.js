@@ -1,7 +1,11 @@
-import { getAccounts, getLatestInterest } from "../middleware/finance";
-import User from "../models/user.js";
+import {
+  createAccountUtil,
+  createTransactionEntry,
+  getAccounts,
+} from "../middleware/finance";
 import Account from "../models/account.js";
-import Interest from "../models/interest.js";
+import Sequence from "../models/sequence.js";
+import User from "../models/user.js";
 
 export const getMemberAccounts = async (req, res) => {
   try {
@@ -12,8 +16,21 @@ export const getMemberAccounts = async (req, res) => {
       return;
     }
     const accounts = await getAccounts(id);
-    console.log("accounts found", accounts);
-    res.status(200).json({ user: user, accounts: accounts });
+    const memberAccounts = accounts.filter((account) => account.type !== "c");
+    console.log("accounts found", memberAccounts);
+    res.status(200).json({ user: user, accounts: memberAccounts });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error);
+  }
+};
+
+export const getMemberAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`sending account ${id}`);
+    const account = await Account.findById(id);
+    res.status(200).json(account);
   } catch (error) {
     console.log(error);
     res.status(400).json(error);
@@ -22,8 +39,58 @@ export const getMemberAccounts = async (req, res) => {
 
 export const createNewAccount = async (req, res) => {
   try {
-    const latestInterestScheme = await getLatestInterest();
+    const {
+      accountHolderDetails,
+      credits,
+      debits,
+      userId,
+      type,
+      creatorId,
+      principalAmounts,
+      balance,
+      duration,
+      matureDate,
+      interestApplicable,
+      monthlyAmount,
+      monthlyDate,
+      isActive,
+    } = req.body;
+    // const latestInterestScheme = await getLatestInterest();
+    console.log(req.body);
+    console.log("creating new account");
+
+    const newAccount = await createAccountUtil({
+      accountHolderDetails,
+      credits,
+      debits,
+      userId,
+      type,
+      creatorId,
+      principalAmounts,
+      balance: 0,
+      duration,
+      matureDate,
+      interestApplicable,
+      monthlyAmount,
+      monthlyDate,
+      isActive,
+    });
+    console.log(newAccount);
+    console.log("done");
     
+    console.log("Making initial transaction");
+    const firstTransaction = await createTransactionEntry({
+      amount: principalAmounts[0],
+      accountId: newAccount._id,
+      remark: "Initial transaction",
+      kind: "credit",
+      source: "Member -- Collected",
+      method: "internal",
+      breakDown: "null",
+      proof: "null",
+    });
+    console.log("transaction done", firstTransaction);
+    res.status(200).json(newAccount);
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: error });
