@@ -1,4 +1,4 @@
-import { updateAccount } from "../middleware/finance";
+import { updateAccountUtil } from "../middleware/finance";
 import Account from "../models/account";
 import Transaction from "../models/transaction";
 import { checkPassword } from "../middleware/auth";
@@ -17,7 +17,7 @@ export const makeTransaction = async (req, res) => {
     } = req.body;
     let account;
     if (accountId !== null && accountId !== "") {
-      console.log(req.body);
+      console.log("creating transaction",req.body);
       account = await Account.findById(accountId);
       if (account === null) {
         res.status(404).json("Account not found");
@@ -40,13 +40,13 @@ export const makeTransaction = async (req, res) => {
     });
     if (kind === "credit") {
       const newBalance = account.balance + amount;
-      await updateAccount(account._id, {
+      await updateAccountUtil(account._id, {
         balance: newBalance,
         credits: [...account.credits, newTransaction],
       });
     } else if (kind === "debit") {
       const newBalance = account.balance - amount;
-      await updateAccount(account._id, {
+      await updateAccountUtil(account._id, {
         balance: newBalance,
         debits: [...account.debits, newTransaction],
       });

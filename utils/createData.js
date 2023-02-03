@@ -4,70 +4,28 @@ import Interest from "../models/interest.js";
 import { generateInterestDoc } from "./generateInterest.js";
 
 export const GenerateDBs = () => {
-  const sequences = [
-    {
-      name: "member",
-      value: 1000000001,
-    },
-    {
-      name: "rds",
-      value: 1000000001,
-    },
-    {
-      name: "rdm",
-      value: 1000000001,
-    },
-    {
-      name: "rdl",
-      value: 1000000001,
-    },
-    {
-      name: "fds",
-      value: 1000000001,
-    },
-    {
-      name: "fdm",
-      value: 1000000001,
-    },
-    {
-      name: "fdl",
-      value: 1000000001,
-    },
-    {
-      name: "rds",
-      value: 1000000001,
-    },
-    {
-      name: "rdm",
-      value: 1000000001,
-    },
-    {
-      name: "fix",
-      value: 1000000001,
-    },
-    {
-      name: "rds",
-      value: 1000000001,
-    },
-    {
-      name: "rdm",
-      value: 1000000001,
-    },
-    {
-      name: "flex",
-      value: 1000000001,
-    },
-    {
-      name: "shares",
-      value: 1,
-    },
-  ];
+  const sequence = {
+    member: 1000000001,
+    rds: 1000000001,
+    rdm: 1000000001,
+    rdl: 1000000001,
+    fds: 1000000001,
+    fdm: 1000000001,
+    fdl: 1000000001,
+    rds: 1000000001,
+    rdm: 1000000001,
+    fix: 1000000001,
+    rds: 1000000001,
+    rdm: 1000000001,
+    flex: 1000000001,
+    shares: 1,
+  };
   return new Promise(async (resolve, reject) => {
     const numberOfDocs = await Sequence.count();
     console.log(numberOfDocs, " sequences present in sequence. ");
     if (numberOfDocs === 0) {
       console.log("Creating sequqnces...");
-      await Sequence.insertMany(sequences);
+      await Sequence.create(sequence);
     } else {
       console.log("Not creating documents...");
     }
@@ -83,3 +41,5 @@ export const GenerateDBs = () => {
     resolve();
   });
 };
+
+export const SequenceId = Sequence.find()[0];

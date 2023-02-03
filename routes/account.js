@@ -1,9 +1,14 @@
 import express from "express";
-import { createNewAccount, getMemberAccounts } from "../controllers/account";
+import {
+  createNewAccount,
+  getMemberAccount,
+  getMemberAccounts,
+} from "../controllers/account";
 
 const router = express.Router();
 
 router.get("/:id", getMemberAccounts);
-router.post("/create", createNewAccount);
+router.get("/account/:id", getMemberAccount);
+router.post("/", createNewAccount);
 
 export default router;
