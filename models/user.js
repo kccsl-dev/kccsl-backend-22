@@ -76,6 +76,10 @@ const nomineeDetailsSchema = new Schema({
     // minlength: 12, maxlength: 12
   },
   dateOfBirth: { type: Date },
+  nomineeId: { type: String },
+  nomineePhoneNumber: { type: String },
+  nomineeAddress: { type: addressSchema },
+  nomineeRelationship: { type: String },
 });
 
 const userSchema = new Schema(
