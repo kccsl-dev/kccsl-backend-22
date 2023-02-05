@@ -1,7 +1,8 @@
 import Account from "../models/account.js";
 import Interest from "../models/interest";
 import Sequence from "../models/sequence.js";
-import Transaction from "../models/transaction";
+import Transaction from "../models/transaction.js";
+import User from "../models/user.js";
 
 export const createAccountUtil = async (accountDetails, id) => {
   try {
@@ -20,11 +21,67 @@ export const createAccountUtil = async (accountDetails, id) => {
       await Sequence.findOneAndUpdate({
         [accountDetails.type]: currentNumber + 1,
       });
+      const coordinator = await User.findByIdAndUpdate(
+        accountDetails.creatorId,
+        {
+          $push: { subAccounts: newAccount._id },
+        }
+      );
+      const applicableInterest = await Interest.findById(
+        accountDetails.interestApplicable[0]
+      );
+
+      //adding interest
+      //TODO: Move to separate thread
+      const accountInterest =
+        applicableInterest[accountDetails.type + accountDetails.duration];
+      const totalIncentiveRate =
+        Math.round((accountInterest / 2) * 100) / 100 / 100;
+      const totalIncentiveAmount =
+        Math.round(
+          accountDetails.principalAmounts[0] * totalIncentiveRate * 100
+        ) / 100;
+      console.log(
+        `INCENTIVE: ${totalIncentiveAmount} (@ ${totalIncentiveRate}%)`
+      );
+      const parentIds = [...coordinator.parentIds, coordinator._id];
+      parentIds.reverse();
+      let remainder = totalIncentiveAmount;
+      for (let i = 0; i < parentIds.length; i++) {
+        const parentId = parentIds[i];
+        let amount;
+        if (i === parentIds.length - 1) {
+          amount = remainder;
+        } else {
+          amount = Math.round(remainder * 0.7 * 100) / 100;
+          console.log(`Amount: ${amount}, with remainder ${remainder}`);
+        }
+        remainder = Math.round((remainder - amount) * 100) / 100;
+        console.log(`new remainder: ${remainder}`);
+
+        const accountId = (await User.findById(parentId)).mainSavingsAccount;
+        await createTransactionEntry(
+          {
+            amount: amount,
+            accountId: accountId,
+            remark: `Incentive for ${newAccount._id} collection`,
+            kind: "credit",
+            source: "society",
+            method: "internal",
+            breakDown: "null",
+            proof: "null",
+          },
+          true
+        );
+        console.log(`Incentive of ${amount} given to ${parentId}`);
+        console.log(`Remaining incentive: ${remainder}`);
+      }
     }
-    console.log("updated sequence");
+    console.log("updated sequence and incentive");
     return newAccount;
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
 
@@ -59,7 +116,7 @@ export const getLatestInterest = async () => {
   }
 };
 
-export const createTransactionEntry = async (args) => {
+export const createTransactionEntry = async (args, isIncentive) => {
   try {
     const {
       amount,
@@ -80,12 +137,10 @@ export const createTransactionEntry = async (args) => {
       if (account === null) {
         console.log("Account not found");
         throw new Error({ message: "Account not found" });
-        return;
       }
       if (!account.isActive) {
         console.log("Account not active");
         throw new Error({ message: "Account not active" });
-        return;
       }
     }
     const newTransaction = await Transaction.create({
@@ -99,7 +154,7 @@ export const createTransactionEntry = async (args) => {
       proof,
     });
     if (kind === "credit") {
-      const newBalance = account.balance + amount;
+      const newBalance = parseInt(account.balance) + parseInt(amount);
       await updateAccountUtil(account._id, {
         balance: newBalance,
         credits: [...account.credits, newTransaction],
@@ -112,6 +167,12 @@ export const createTransactionEntry = async (args) => {
         debits: [...account.debits, newTransaction],
       });
       console.log("Debit created");
+    }
+    if (isIncentive) {
+      await User.findByIdAndUpdate(account.userId, {
+        $inc: { totalIncentive: amount },
+      });
+      console.log("Incentive given.");
     }
     console.log("transaction complete");
     return newTransaction;

@@ -153,16 +153,19 @@ export const createUser = async (req, res) => {
         $push: { subMembers: result.phoneNumber },
       });
 
-      const incentiveTransaction = await createTransactionEntry({
-        amount: 1,
-        accountId: coordinator.mainSavingsAccount,
-        remark: `Member Creation Incentive ${phoneNumber}`,
-        kind: "credit",
-        breakDown: [],
-        source: "Society",
-        method: "internal",
-        proof: "N/A",
-      });
+      const incentiveTransaction = await createTransactionEntry(
+        {
+          amount: 1,
+          accountId: coordinator.mainSavingsAccount,
+          remark: `Member Creation Incentive ${phoneNumber}`,
+          kind: "credit",
+          breakDown: [],
+          source: "Society",
+          method: "internal",
+          proof: "N/A",
+        },
+        true
+      );
 
       console.log("Done", incentiveTransaction);
     }
@@ -234,16 +237,19 @@ export const makeCoordinator = async (req, res) => {
     console.log("granting incentive");
     const coordinator = await User.findById(converterId);
     if (updatedUser.creatorId !== "superAdmin") {
-      const incentiveTransaction = await createTransactionEntry({
-        amount: 500,
-        accountId: coordinator.mainSavingsAccount,
-        remark: `coordinator making incentive ${phoneNumber}`,
-        kind: "credit",
-        source: "society",
-        method: "internal",
-        breakDown: "null",
-        proof: "null",
-      });
+      const incentiveTransaction = await createTransactionEntry(
+        {
+          amount: 500,
+          accountId: coordinator.mainSavingsAccount,
+          remark: `coordinator making incentive ${phoneNumber}`,
+          kind: "credit",
+          source: "society",
+          method: "internal",
+          breakDown: "null",
+          proof: "null",
+        },
+        true
+      );
       console.log("incentive granted", incentiveTransaction);
     }
     res.status(200).json(updatedUser);
