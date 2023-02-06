@@ -16,6 +16,7 @@ const sequenceSchema = new Schema(
     rdm: { type: Number, required: true },
     flex: { type: Number, required: true },
     shares: { type: Number, required: true },
+    shareReceipt: { type: Number, reqruied: true },
   },
   { timestamps: true }
 );

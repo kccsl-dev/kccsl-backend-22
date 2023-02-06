@@ -10,10 +10,13 @@ export const createAccountUtil = async (accountDetails, id) => {
     console.log(accountDetails);
     const sequence = await Sequence.findOne();
     const currentNumber = sequence[accountDetails.type];
-    const accountNumber = id || accountDetails.type + currentNumber;
+    const accountNumber =
+      id || accountDetails.type.toUpperCase() + currentNumber;
+    console.log(15, accountNumber);
     const newAccount = await Account.create({
       ...accountDetails,
       accountNumber: accountNumber,
+      type: accountDetails.type.toUpperCase(),
       _id: accountNumber,
     });
     console.log("Util: done");
@@ -143,6 +146,14 @@ export const createTransactionEntry = async (args, isIncentive) => {
         throw new Error({ message: "Account not active" });
       }
     }
+
+    let transactionBalance;
+    if (kind === "credit") {
+      transactionBalance = parseInt(account.balance) + parseInt(amount);
+    } else if (kind === "debit") {
+      transactionBalance = parseInt(account.balance) - parseInt(amount);
+    }
+    console.log(156, transactionBalance);
     const newTransaction = await Transaction.create({
       amount,
       accountId,
@@ -152,18 +163,19 @@ export const createTransactionEntry = async (args, isIncentive) => {
       source,
       method,
       proof,
+      accountBalance: parseInt(transactionBalance),
     });
     if (kind === "credit") {
       const newBalance = parseInt(account.balance) + parseInt(amount);
       await updateAccountUtil(account._id, {
-        balance: newBalance,
+        balance: parseInt(newBalance),
         credits: [...account.credits, newTransaction],
       });
       console.log("Credit created");
     } else if (kind === "debit") {
-      const newBalance = account.balance - amount;
+      const newBalance = parseInt(account.balance) - parseInt(amount);
       await updateAccountUtil(account._id, {
-        balance: newBalance,
+        balance: parseInt(newBalance),
         debits: [...account.debits, newTransaction],
       });
       console.log("Debit created");

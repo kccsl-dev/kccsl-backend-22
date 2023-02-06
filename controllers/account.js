@@ -4,8 +4,9 @@ import {
   getAccounts,
 } from "../middleware/finance";
 import Account from "../models/account.js";
-import Sequence from "../models/sequence.js";
 import User from "../models/user.js";
+import Sequence from "../models/sequence";
+import user from "../models/user.js";
 
 export const getMemberAccounts = async (req, res) => {
   try {
@@ -16,7 +17,7 @@ export const getMemberAccounts = async (req, res) => {
       return;
     }
     const accounts = await getAccounts(id);
-    const memberAccounts = accounts.filter((account) => account.type !== "c");
+    const memberAccounts = accounts.filter((account) => account.type !== "C");
     console.log("accounts found", memberAccounts);
     res.status(200).json({ user: user, accounts: memberAccounts });
   } catch (error) {
@@ -75,9 +76,8 @@ export const createNewAccount = async (req, res) => {
       monthlyDate,
       isActive,
     });
-    console.log(newAccount);
     console.log("done");
-    
+
     console.log("Making initial transaction");
     const firstTransaction = await createTransactionEntry({
       amount: principalAmounts[0],
@@ -89,10 +89,48 @@ export const createNewAccount = async (req, res) => {
       breakDown: "null",
       proof: "null",
     });
-    console.log("transaction done", firstTransaction);
+    console.log("transaction done");
     res.status(200).json(newAccount);
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: error });
+  }
+};
+
+export const buyShares = async (req, res) => {
+  try {
+    const { id, noOfShares } = req.body;
+    const sequence = await Sequence.findOne();
+    const currentShareNumber = sequence.shares;
+    const currentShareReceiptNumber = sequence.shareReceipt;
+    const newShareNumber = currentShareNumber + parseInt(noOfShares) - 1;
+
+    const shares = [];
+    for (let share = currentShareNumber; share <= newShareNumber; share++) {
+      shares.push(share.toString());
+    }
+    console.log(id, noOfShares, shares);
+    const shareDetailsObj = {
+      datePurchased: new Date(),
+      noOfShares: noOfShares,
+      rn: currentShareReceiptNumber,
+      isMemberCreation: false,
+    };
+
+    const updatedUser = await user.findByIdAndUpdate(id, {
+      $push: { shares: { $each: shares }, shareDetails: shareDetailsObj },
+    });
+    console.log("Shares bought");
+
+    await Sequence.findOneAndUpdate({
+      shares: currentShareNumber + noOfShares + 1,
+      shareReceipt: currentShareReceiptNumber + 1,
+    });
+    console.log("Share sequence updated");
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error);
   }
 };

@@ -14,6 +14,7 @@ export const transactionSchema = new Schema(
     },
     proof: { type: String, required: true },
     breakdown: { type: [Object] },
+    accountBalance: { type: Number },
   },
   { timestamps: true }
 );
