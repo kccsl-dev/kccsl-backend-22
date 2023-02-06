@@ -17,7 +17,7 @@ export const makeTransaction = async (req, res) => {
     } = req.body;
     let account;
     if (accountId !== null && accountId !== "") {
-      console.log("creating transaction",req.body);
+      console.log("creating transaction", req.body);
       account = await Account.findById(accountId);
       if (account === null) {
         res.status(404).json("Account not found");
@@ -28,6 +28,12 @@ export const makeTransaction = async (req, res) => {
         return;
       }
     }
+    let transactionBalance;
+    if (kind === "credit") {
+      transactionBalance = parseInt(account.balance) + parseInt(amount);
+    } else if (kind === "debit") {
+      transactionBalance = parseInt(account.balance) - parseInt(amount);
+    }
     const newTransaction = await Transaction.create({
       amount,
       accountId,
@@ -37,17 +43,18 @@ export const makeTransaction = async (req, res) => {
       source,
       method,
       proof,
+      accountBalance: parseInt(transactionBalance),
     });
     if (kind === "credit") {
-      const newBalance = account.balance + amount;
+      const newBalance = parseInt(account.balance) + parseInt(amount);
       await updateAccountUtil(account._id, {
-        balance: newBalance,
+        balance: parseInt(newBalance),
         credits: [...account.credits, newTransaction],
       });
     } else if (kind === "debit") {
-      const newBalance = account.balance - amount;
+      const newBalance = parseInt(account.balance) - parseInt(amount);
       await updateAccountUtil(account._id, {
-        balance: newBalance,
+        balance: parseInt(newBalance),
         debits: [...account.debits, newTransaction],
       });
     }

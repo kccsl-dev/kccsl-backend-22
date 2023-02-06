@@ -82,6 +82,13 @@ const nomineeDetailsSchema = new Schema({
   nomineeRelationship: { type: String },
 });
 
+const shareSchema = {
+  datePurchased: { type: Date },
+  noOfShares: { type: Number },
+  rn: { type: String },
+  isMemberCreation: { type: Boolean },
+};
+
 const userSchema = new Schema(
   {
     _id: String,
@@ -112,6 +119,8 @@ const userSchema = new Schema(
     mainSavingsAccount: { type: String, required: true },
     hasBeenActivated: { type: Boolean, required: true },
     shares: { type: [String], required: true },
+    shareDetails: { type: [shareSchema] },
+    isOTPVerified: { type: Boolean, required: true },
     accounts: { type: [String] },
     collectionAccount: { type: String, requried: true },
     isCoordinator: { type: Boolean },

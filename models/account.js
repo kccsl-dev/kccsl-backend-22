@@ -24,7 +24,7 @@ const AccountSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["s", "rds", "rdm", "rdl", "fds", "fdm", "fdl", "fix", "flex", "c"],
+      enum: ["S", "RDS", "RDM", "RDL", "FDS", "FDM", "FDL", "FIX", "FLEX", "C"],
     },
     credits: { type: [transactionSchema], required: true },
     debits: { type: [transactionSchema], required: true },

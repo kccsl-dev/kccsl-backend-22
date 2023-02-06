@@ -72,10 +72,9 @@ export const createUser = async (req, res) => {
     const hashed = await bcrypt.hash("password", 12);
 
     const sequence = await Sequence.findOne();
-    console.log(sequence);
     const memberId = sequence.member;
-    console.log(memberId);
     const currentShareNumber = sequence.shares;
+    const currentShareReceiptNumber = sequence.shareReceipt;
     const newShareNumber = currentShareNumber + noOfShares - 1;
 
     const shares = [];
@@ -109,7 +108,7 @@ export const createUser = async (req, res) => {
         type: "s",
         isActive: true,
       },
-      `s${memberId}`
+      `S${memberId}`
     );
     console.log("Done: " + mainSavingsAccount._id);
 
@@ -120,7 +119,7 @@ export const createUser = async (req, res) => {
         type: "c",
         isActive: false,
       },
-      `c${memberId}`
+      `C${memberId}`
     );
     console.log("Done: " + collectionAccount._id);
 
@@ -140,6 +139,15 @@ export const createUser = async (req, res) => {
       nomineeDetails,
       mainSavingsAccount: mainSavingsAccount._id,
       shares: shares,
+      shareDetails: [
+        {
+          datePurchased: new Date(),
+          noOfShares: noOfShares,
+          rn: currentShareReceiptNumber,
+          isMemberCreation: true,
+        },
+      ],
+      isOTPVerified: false,
       accounts: [mainSavingsAccount._id],
       hasBeenActivated,
       collectionAccount: collectionAccount._id,
@@ -173,6 +181,7 @@ export const createUser = async (req, res) => {
     await Sequence.findOneAndUpdate({
       member: memberId + 1,
       shares: currentShareNumber + noOfShares + 1,
+      shareReceipt: currentShareReceiptNumber + 1,
     });
     console.log("Member sequence updated");
     console.log("Shares sequence updated");

@@ -19,6 +19,7 @@ export const GenerateDBs = () => {
     rdm: 1000000001,
     flex: 1000000001,
     shares: 1,
+    shareReceipt: 1,
   };
   return new Promise(async (resolve, reject) => {
     const numberOfDocs = await Sequence.count();
