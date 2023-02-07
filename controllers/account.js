@@ -109,11 +109,12 @@ export const buyShares = async (req, res) => {
     for (let share = currentShareNumber; share <= newShareNumber; share++) {
       shares.push(share.toString());
     }
+    const today = new Date();
     console.log(id, noOfShares, shares);
     const shareDetailsObj = {
-      datePurchased: new Date(),
+      datePurchased: today,
       noOfShares: noOfShares,
-      rn: currentShareReceiptNumber,
+      rn: `${currentShareReceiptNumber}/${today.getMonth()}/${today.getFullYear()}`,
       isMemberCreation: false,
     };
 

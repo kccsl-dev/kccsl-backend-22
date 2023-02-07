@@ -125,6 +125,7 @@ export const createUser = async (req, res) => {
     console.log("Done: " + collectionAccount._id);
 
     console.log("Creating user...");
+    const today = new Date();
     const creationData = {
       _id: phoneNumber,
       phoneNumber,
@@ -142,9 +143,9 @@ export const createUser = async (req, res) => {
       shares: shares,
       shareDetails: [
         {
-          datePurchased: new Date(),
+          datePurchased: today,
           noOfShares: noOfShares,
-          rn: currentShareReceiptNumber,
+          rn: `${currentShareReceiptNumber}/${today.getMonth()}/${today.getFullYear()}`,
           isMemberCreation: true,
         },
       ],
