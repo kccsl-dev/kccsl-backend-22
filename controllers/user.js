@@ -1,4 +1,5 @@
 import User from "../models/user.js";
+import Guest from "../models/guest.js";
 import Sequence from "../models/sequence.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -327,5 +328,16 @@ export const signin = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error });
+  }
+};
+
+export const addGuestInfo = async (req, res) => {
+  try {
+    const { email, phoneNumber } = req.body;
+    const newGuest = await Guest.create({ email, phoneNumber });
+    res.status(200).json(newGuest);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error);
   }
 };
