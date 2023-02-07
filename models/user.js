@@ -127,6 +127,7 @@ const userSchema = new Schema(
     collectionAccount: { type: String, requried: true },
     isCoordinator: { type: Boolean },
     converterId: { type: String },
+    conversionDate: { type: Date },
     subMembers: { type: [String] },
     subAccounts: { type: [String] },
     totalIncentive: { type: Number },
