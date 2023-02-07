@@ -35,7 +35,8 @@ const personalInfoSchema = new Schema({
     // minlength: 12,
     // maxlength: 12,
   },
-  aadharCard: { type: String },
+  aadharCardFront: { type: String },
+  aadharCardBack: { type: String },
   panNumber: {
     type: String,
     // minlength: 10, maxlength: 10
