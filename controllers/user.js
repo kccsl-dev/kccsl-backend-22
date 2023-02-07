@@ -238,6 +238,7 @@ export const makeCoordinator = async (req, res) => {
       coordinatorId: `C${user.memberId}`,
       roles: [...user.roles, "coordinator"],
       converterId,
+      coversionDate: new Date(),
       isCoordinator: true,
       subMembers: [],
       subAccounts: [],
