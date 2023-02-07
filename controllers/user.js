@@ -238,12 +238,13 @@ export const makeCoordinator = async (req, res) => {
       coordinatorId: `C${user.memberId}`,
       roles: [...user.roles, "coordinator"],
       converterId,
-      coversionDate: new Date(),
+      conversionDate: new Date(),
       isCoordinator: true,
       subMembers: [],
       subAccounts: [],
     });
     console.log(phoneNumber, "made coordinator");
+    console.log(updatedUser);
     console.log("granting incentive");
     const coordinator = await User.findById(converterId);
     if (updatedUser.creatorId !== "superAdmin") {
