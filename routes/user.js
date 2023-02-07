@@ -9,6 +9,7 @@ import {
   updateMember,
   getCoordinators,
   getCoordinator,
+  resetPassword,
 } from "../controllers/user.js";
 import auth from "../middleware/auth.js";
 
@@ -23,5 +24,6 @@ router.post("/create", createUser);
 router.post("/signin", signin);
 router.post("/makeCoordinator", makeCoordinator);
 router.post("/updateMember", updateMember);
+router.post('/resetPassword', resetPassword)
 
 export default router;
