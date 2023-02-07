@@ -122,6 +122,7 @@ const userSchema = new Schema(
     shares: { type: [String], required: true },
     shareDetails: { type: [shareSchema] },
     isOTPVerified: { type: Boolean, required: true },
+    isPasswordReset: { type: Boolean },
     accounts: { type: [String] },
     collectionAccount: { type: String, requried: true },
     isCoordinator: { type: Boolean },

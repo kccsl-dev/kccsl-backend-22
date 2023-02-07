@@ -204,7 +204,6 @@ export const updateMember = async (req, res) => {
       res.status(400).json("Member not found.");
       return;
     }
-    console.log(data);
 
     await updateAccountUtil(user.mainSavingsAccount, { isActive: true });
     const updatedUser = await User.findByIdAndUpdate(phoneNumber, {
@@ -336,6 +335,31 @@ export const addGuestInfo = async (req, res) => {
     const { email, phoneNumber } = req.body;
     const newGuest = await Guest.create({ email, phoneNumber });
     res.status(200).json(newGuest);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error);
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    const { newPassword } = req.body;
+    console.log("(re)setting member password", phoneNumber);
+    const user = await User.findById(phoneNumber);
+
+    if (user === null) {
+      res.status(400).json("Member not found.");
+      return;
+    }
+    const password = await bcrypt.hash(newPassword, 12);
+
+    const updatedUser = await User.findByIdAndUpdate(phoneNumber, {
+      password,
+      isPasswordReset: true,
+    });
+    console.log("user updated");
+    res.status(200).json(updatedUser);
   } catch (error) {
     console.log(error);
     res.status(400).json(error);
