@@ -12,7 +12,6 @@ export const createAccountUtil = async (accountDetails, id) => {
     const currentNumber = sequence[accountDetails.type];
     const accountNumber =
       id || accountDetails.type.toUpperCase() + currentNumber;
-    console.log(15, accountNumber);
     const newAccount = await Account.create({
       ...accountDetails,
       accountNumber: accountNumber,
@@ -30,55 +29,13 @@ export const createAccountUtil = async (accountDetails, id) => {
           $push: { subAccounts: newAccount._id },
         }
       );
-      const applicableInterest = await Interest.findById(
-        accountDetails.interestApplicable[0]
-      );
 
       //adding interest
-      //TODO: Move to separate thread
-      const accountInterest =
-        applicableInterest[accountDetails.type + accountDetails.duration];
-      const totalIncentiveRate =
-        Math.round((accountInterest / 2) * 100) / 100 / 100;
-      const totalIncentiveAmount =
-        Math.round(
-          accountDetails.principalAmounts[0] * totalIncentiveRate * 100
-        ) / 100;
-      console.log(
-        `INCENTIVE: ${totalIncentiveAmount} (@ ${totalIncentiveRate}%)`
+      await grantCollectionIncentive(
+        accountDetails,
+        coordinator._id,
+        newAccount._id
       );
-      const parentIds = [...coordinator.parentIds, coordinator._id];
-      parentIds.reverse();
-      let remainder = totalIncentiveAmount;
-      for (let i = 0; i < parentIds.length; i++) {
-        const parentId = parentIds[i];
-        let amount;
-        if (i === parentIds.length - 1) {
-          amount = remainder;
-        } else {
-          amount = Math.round(remainder * 0.7 * 100) / 100;
-          console.log(`Amount: ${amount}, with remainder ${remainder}`);
-        }
-        remainder = Math.round((remainder - amount) * 100) / 100;
-        console.log(`new remainder: ${remainder}`);
-
-        const accountId = (await User.findById(parentId)).mainSavingsAccount;
-        await createTransactionEntry(
-          {
-            amount: amount,
-            accountId: accountId,
-            remark: `Incentive for ${newAccount._id} collection`,
-            kind: "credit",
-            source: "society",
-            method: "internal",
-            breakDown: "null",
-            proof: "null",
-          },
-          true
-        );
-        console.log(`Incentive of ${amount} given to ${parentId}`);
-        console.log(`Remaining incentive: ${remainder}`);
-      }
     }
     console.log("updated sequence and incentive");
     return newAccount;
@@ -153,7 +110,6 @@ export const createTransactionEntry = async (args, isIncentive) => {
     } else if (kind === "debit") {
       transactionBalance = parseInt(account.balance) - parseInt(amount);
     }
-    console.log(156, transactionBalance);
     const newTransaction = await Transaction.create({
       amount,
       accountId,
@@ -191,5 +147,63 @@ export const createTransactionEntry = async (args, isIncentive) => {
   } catch (error) {
     console.log(error);
     return error;
+  }
+};
+
+export const grantCollectionIncentive = async (
+  accountDetails,
+  coordinatorId,
+  collectionAccountId
+) => {
+  //TODO: Move to separate thread
+  const applicableInterest = await Interest.findById(
+    accountDetails.interestApplicable[
+      accountDetails.interestApplicable.length - 1
+    ]
+  );
+  const coordinator = await User.findById(coordinatorId);
+  const accountInterest =
+    applicableInterest[accountDetails.type + accountDetails.duration];
+  console.log(167, accountDetails.type + accountDetails.duration);
+  const totalIncentiveRate =
+    Math.round((accountInterest / 2) * 100) / 100 / 100;
+  const totalIncentiveAmount =
+    Math.round(accountDetails.principalAmounts[0] * totalIncentiveRate * 100) /
+    100;
+  console.log(`INCENTIVE: ${totalIncentiveAmount} (@ ${totalIncentiveRate}%)`);
+  if (isNaN(totalIncentiveAmount)) {
+    throw new Error("Incentive cannot be NaN");
+  }
+  const parentIds = [...coordinator.parentIds, coordinator._id];
+  parentIds.reverse();
+  let remainder = totalIncentiveAmount;
+  for (let i = 0; i < parentIds.length; i++) {
+    const parentId = parentIds[i];
+    let amount;
+    if (i === parentIds.length - 1) {
+      amount = remainder;
+    } else {
+      amount = Math.round(remainder * 0.7 * 100) / 100;
+      console.log(`Amount: ${amount}, with remainder ${remainder}`);
+    }
+    remainder = Math.round((remainder - amount) * 100) / 100;
+    console.log(`new remainder: ${remainder}`);
+
+    const accountId = (await User.findById(parentId)).mainSavingsAccount;
+    await createTransactionEntry(
+      {
+        amount: amount,
+        accountId: accountId,
+        remark: `Incentive for ${collectionAccountId} collection`,
+        kind: "credit",
+        source: "society",
+        method: "internal",
+        breakDown: "null",
+        proof: "null",
+      },
+      true
+    );
+    console.log(`Incentive of ${amount} given to ${parentId}`);
+    console.log(`Remaining incentive: ${remainder}`);
   }
 };

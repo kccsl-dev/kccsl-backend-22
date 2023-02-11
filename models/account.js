@@ -15,6 +15,11 @@ const personalInfoSchema = new Schema({
   panNumber: { type: String, reqruied: false, minlength: 10, maxlength: 10 },
 });
 
+const guarenterSchema = {
+  userId: { type: String, requried: true },
+  amount: { type: Number, requried: true },
+};
+
 const AccountSchema = new Schema(
   {
     _id: String,
@@ -40,6 +45,8 @@ const AccountSchema = new Schema(
     monthlyAmount: { type: Number },
     monthlyDate: { type: String },
     isActive: { type: Boolean, requried: true },
+    isApproved: { type: Boolean },
+    guarenters: { type: [guarenterSchema] },
   },
   { timestamps: true }
 );

@@ -1,9 +1,12 @@
-import { updateAccountUtil } from "../middleware/finance";
+import {
+  updateAccountUtil,
+  grantCollectionIncentive,
+} from "../middleware/finance";
 import Account from "../models/account";
 import Transaction from "../models/transaction";
-import { checkPassword } from "../middleware/auth";
 
 export const makeTransaction = async (req, res) => {
+  //TODO: Use createTransactionEntry here
   try {
     const {
       amount,
@@ -14,10 +17,12 @@ export const makeTransaction = async (req, res) => {
       method,
       breakDown,
       proof,
+      isCollection,
+      coordinatorId,
     } = req.body;
     let account;
     if (accountId !== null && accountId !== "") {
-      console.log("creating transaction", req.body);
+      console.log("creating transaction from route", req.body);
       account = await Account.findById(accountId);
       if (account === null) {
         res.status(404).json("Account not found");
@@ -59,6 +64,12 @@ export const makeTransaction = async (req, res) => {
       });
     }
     console.log("transaction complete");
+
+    if (isCollection) {
+      console.log("Granting incentive");
+      await grantCollectionIncentive(account, coordinatorId, account._id);
+    }
+
     res.status(200).json(newTransaction);
   } catch (error) {
     console.log(error);

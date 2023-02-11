@@ -118,6 +118,7 @@ const userSchema = new Schema(
     bankAccountDetails: { type: bankDetailsSchema },
     nomineeDetails: { type: [nomineeDetailsSchema] },
     mainSavingsAccount: { type: String, required: true },
+    creditLine: { type: Number },
     hasBeenActivated: { type: Boolean, required: true },
     shares: { type: [String], required: true },
     shareDetails: { type: [shareSchema] },
