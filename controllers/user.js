@@ -106,7 +106,7 @@ export const createUser = async (req, res) => {
     const mainSavingsAccount = await createAccountUtil(
       {
         ...accountDetails,
-        type: "s",
+        type: "S",
         isActive: true,
       },
       `S${memberId}`
@@ -117,7 +117,7 @@ export const createUser = async (req, res) => {
     const collectionAccount = await createAccountUtil(
       {
         ...accountDetails,
-        type: "c",
+        type: "C",
         isActive: false,
       },
       `C${memberId}`
