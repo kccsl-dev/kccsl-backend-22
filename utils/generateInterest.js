@@ -12,6 +12,8 @@ export const generateInterestDoc = (baseRate) => {
   const FDM48 = FDM36 + 0.5;
   const FDL60 = FDM48 + 0.5;
   const FDL72 = FDL60 + 0.5;
+  const FLEX = baseRate * 3;
+  const FIXED = FLEX - 2;
   return {
     baseRate,
     S,
@@ -27,5 +29,7 @@ export const generateInterestDoc = (baseRate) => {
     FDM48,
     FDL60,
     FDL72,
+    FIXED,
+    FLEX,
   };
 };

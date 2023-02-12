@@ -4,6 +4,7 @@ import {
 } from "../middleware/finance";
 import Account from "../models/account";
 import Transaction from "../models/transaction";
+import User from "../models/user";
 
 export const makeTransaction = async (req, res) => {
   //TODO: Use createTransactionEntry here
@@ -19,6 +20,7 @@ export const makeTransaction = async (req, res) => {
       proof,
       isCollection,
       coordinatorId,
+      goesToCredit,
     } = req.body;
     let account;
     if (accountId !== null && accountId !== "") {
@@ -64,6 +66,12 @@ export const makeTransaction = async (req, res) => {
       });
     }
     console.log("transaction complete");
+
+    if (goesToCredit) {
+      await User.findByIdAndUpdate(account.userId, {
+        $inc: { creditLine: amount * 0.7 },
+      });
+    }
 
     if (isCollection) {
       console.log("Granting incentive");

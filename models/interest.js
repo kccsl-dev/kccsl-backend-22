@@ -20,6 +20,9 @@ const interestSchema = new Schema(
     FDM48: { type: Number, reqruied: true },
     FDL60: { type: Number, reqruied: true },
     FDL72: { type: Number, reqruied: true },
+
+    FIXED: { type: Number, reqruied: true },
+    FLEX: { type: Number, reqruied: true },
   },
   { timestamps: true }
 );

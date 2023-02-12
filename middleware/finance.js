@@ -4,7 +4,7 @@ import Sequence from "../models/sequence.js";
 import Transaction from "../models/transaction.js";
 import User from "../models/user.js";
 
-export const createAccountUtil = async (accountDetails, id) => {
+export const createAccountUtil = async (accountDetails, id, isLoan) => {
   try {
     console.log("Util: creating account");
     console.log(accountDetails);
@@ -19,7 +19,8 @@ export const createAccountUtil = async (accountDetails, id) => {
       _id: accountNumber,
     });
     console.log("Util: done");
-    if (accountDetails.type !== "s" && accountDetails.type !== "c") {
+
+    if (accountDetails.type !== "S" && accountDetails.type !== "C") {
       await Sequence.findOneAndUpdate({
         [accountDetails.type]: currentNumber + 1,
       });
@@ -30,12 +31,14 @@ export const createAccountUtil = async (accountDetails, id) => {
         }
       );
 
-      //adding interest
-      await grantCollectionIncentive(
-        accountDetails,
-        coordinator._id,
-        newAccount._id
-      );
+      //adding
+      if (!isLoan) {
+        await grantCollectionIncentive(
+          accountDetails,
+          coordinator._id,
+          newAccount._id
+        );
+      }
     }
     console.log("updated sequence and incentive");
     return newAccount;
@@ -47,7 +50,10 @@ export const createAccountUtil = async (accountDetails, id) => {
 
 export const updateAccountUtil = async (id, updatedDetails) => {
   try {
-    const updatedAccount = Account.findByIdAndUpdate(id, { ...updatedDetails });
+    const updatedAccount = await Account.findByIdAndUpdate(id, {
+      ...updatedDetails,
+    });
+    await recalculateCreditLine(updatedAccount.userId);
     return updatedAccount;
   } catch (error) {
     console.log(error);
@@ -87,6 +93,7 @@ export const createTransactionEntry = async (args, isIncentive) => {
       method,
       breakDown,
       proof,
+      goesToCredit,
     } = args;
     console.log(args);
     let account;
@@ -136,6 +143,7 @@ export const createTransactionEntry = async (args, isIncentive) => {
       });
       console.log("Debit created");
     }
+
     if (isIncentive) {
       await User.findByIdAndUpdate(account.userId, {
         $inc: { totalIncentive: amount },
@@ -164,7 +172,6 @@ export const grantCollectionIncentive = async (
   const coordinator = await User.findById(coordinatorId);
   const accountInterest =
     applicableInterest[accountDetails.type + accountDetails.duration];
-  console.log(167, accountDetails.type + accountDetails.duration);
   const totalIncentiveRate =
     Math.round((accountInterest / 2) * 100) / 100 / 100;
   const totalIncentiveAmount =
@@ -206,4 +213,31 @@ export const grantCollectionIncentive = async (
     console.log(`Incentive of ${amount} given to ${parentId}`);
     console.log(`Remaining incentive: ${remainder}`);
   }
+};
+
+//TODO: Use this instead of direct implementation (for example, create account and create loan)
+export const recalculateCreditLine = async (id) => {
+  console.log("Recalculating credit for", id);
+  const accounts = await Account.find({ userId: id });
+  let credit = 0;
+  const depositCodes = ["RDS", "RDM", "RDL", "FDS", "FDM", "FDL"];
+  const invalidLoans = ["DENIED", "PENDING", "PAID"];
+  const deposits = accounts.filter((account) =>
+    depositCodes.includes(account.type)
+  );
+  deposits.forEach((deposit) => {
+    credit += deposit.principalAmounts[0];
+  });
+  console.log("credit before loan", credit);
+  credit = credit * 0.7;
+  const loans = accounts.filter(
+    (account) => account.isLoan && !invalidLoans.includes(account.type)
+  );
+  console.log("236", accounts);
+  console.log("loans", loans);
+  loans.forEach((loan) => {
+    credit += loan.balance;
+  });
+  console.log("New credit: ", credit);
+  await User.findByIdAndUpdate(id, { creditLine: credit });
 };
