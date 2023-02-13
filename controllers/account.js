@@ -9,6 +9,7 @@ import Account from "../models/account.js";
 import User from "../models/user.js";
 import Sequence from "../models/sequence";
 import Demand from "../models/demand";
+import Guarenter from "../models/guarenter";
 
 export const getMemberAccounts = async (req, res) => {
   try {
@@ -345,5 +346,114 @@ export const approveLoan = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(400).json(error);
+  }
+};
+
+export const addGuarenter = async (req, res) => {
+  try {
+    console.log("Adding guarenter.");
+    const { memberId, coordinatorId, guarenterId, loanId, amount } = req.body;
+    console.log(amount);
+    const guarenter = await User.findById(guarenterId);
+    if (!guarenter) {
+      res.status(404).json("Member not found.");
+      console.log("Guarenter not found.", guarenterId);
+      return;
+    }
+    const member = await User.findById(memberId);
+    const coordinator = await User.findById(coordinatorId);
+    const guarenteeRecord = await Guarenter.create({
+      guarenterDetails: {
+        id: guarenter._id,
+        memberId: guarenter.memberId,
+        name: `${guarenter.personalInfo.firstName} ${guarenter.personalInfo.middleName} ${guarenter.personalInfo.lastName}`,
+      },
+      borrowerDetails: {
+        id: member._id,
+        memberId: member.memberId,
+        name: `${member.personalInfo.firstName} ${member.personalInfo.middleName} ${member.personalInfo.lastName}`,
+      },
+      coordinatorDetails: {
+        id: coordinator._id,
+        memberId: coordinator.memberId,
+        name: `${coordinator.personalInfo.firstName} ${coordinator.personalInfo.middleName} ${coordinator.personalInfo.lastName}`,
+      },
+      loanId,
+      amount,
+      status: "PENDING",
+    });
+    await updateAccountUtil(loanId, {
+      $push: { guarenters: guarenteeRecord._id },
+    });
+    const updatedG = await User.findByIdAndUpdate(guarenterId, {
+      guarentees: [...guarenter.guarentees, guarenteeRecord._id],
+    });
+    console.log(389, updatedG);
+    console.log("Guarenter added.");
+    res.status(200).json(guarenteeRecord);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json();
+  }
+};
+
+export const getLoanGuarenters = async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const loan = await Account.findById(loanId);
+    const guarenteeRecords = await Guarenter.find({
+      _id: {
+        $in: loan.guarenters,
+      },
+    });
+    res.status(200).json(guarenteeRecords);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json();
+  }
+};
+
+export const getGuarenters = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    console.log("sending guarentees for", userId);
+    const user = await User.findById(userId);
+    const gs = await Guarenter.find({
+      _id: {
+        $in: user.guarentees,
+      },
+    });
+    res.status(200).json(gs);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json();
+  }
+};
+
+export const acceptGuarentee = async (req, res) => {
+  try {
+    const { id } = req.body;
+    console.log("approving guarentee", id);
+    const g = await Guarenter.findByIdAndUpdate(id, {
+      status: "APPROVED",
+    });
+    res.status(200).json(g);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json();
+  }
+};
+
+export const denyGuarentee = async (req, res) => {
+  try {
+    const { id } = req.body;
+    console.log("denying guarentee", id);
+    const g = await Guarenter.findByIdAndUpdate(id, {
+      status: "DENIED",
+    });
+    res.status(200).json(g);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json();
   }
 };
