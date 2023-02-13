@@ -15,11 +15,6 @@ const personalInfoSchema = new Schema({
   panNumber: { type: String, reqruied: false, minlength: 10, maxlength: 10 },
 });
 
-const guarenterSchema = {
-  userId: { type: String, requried: true },
-  amount: { type: Number, requried: true },
-};
-
 const AccountSchema = new Schema(
   {
     _id: String,
@@ -60,7 +55,7 @@ const AccountSchema = new Schema(
       type: String,
       enum: ["PENDING", "APPROVED", "DISBURSED", "REPAID", "DENIED"],
     },
-    guarenters: { type: [guarenterSchema] },
+    guarenters: { type: [String] },
     isLoan: { type: Boolean },
   },
   { timestamps: true }

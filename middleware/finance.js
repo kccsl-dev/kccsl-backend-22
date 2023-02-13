@@ -231,7 +231,7 @@ export const recalculateCreditLine = async (id) => {
   console.log("credit before loan", credit);
   credit = credit * 0.7;
   const loans = accounts.filter(
-    (account) => account.isLoan && !invalidLoans.includes(account.type)
+    (account) => account.isLoan && !invalidLoans.includes(account.status)
   );
   console.log("236", accounts);
   console.log("loans", loans);

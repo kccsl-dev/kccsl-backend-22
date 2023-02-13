@@ -133,6 +133,7 @@ const userSchema = new Schema(
     subMembers: { type: [String] },
     subAccounts: { type: [String] },
     totalIncentive: { type: Number },
+    guarentees: { type: [String] },
     pendingLoans: { type: [String] },
   },
   { timestamps: true }
