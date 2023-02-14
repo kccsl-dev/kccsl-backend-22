@@ -220,6 +220,7 @@ export const recalculateCreditLine = async (id) => {
   console.log("Recalculating credit for", id);
   const accounts = await Account.find({ userId: id });
   let credit = 0;
+  let effectiveDate = new Date();
   const depositCodes = ["RDS", "RDM", "RDL", "FDS", "FDM", "FDL"];
   const invalidLoans = ["DENIED", "PENDING", "PAID"];
   const deposits = accounts.filter((account) =>
@@ -227,6 +228,11 @@ export const recalculateCreditLine = async (id) => {
   );
   deposits.forEach((deposit) => {
     credit += deposit.principalAmounts[0];
+    let depositDate = new Date(deposit.createdAt);
+    if (depositDate < effectiveDate) {
+      effectiveDate = depositDate;
+      console.log("setting effective date", effectiveDate);
+    }
   });
   console.log("credit before loan", credit);
   credit = credit * 0.7;
@@ -239,5 +245,9 @@ export const recalculateCreditLine = async (id) => {
     credit += loan.balance;
   });
   console.log("New credit: ", credit);
-  await User.findByIdAndUpdate(id, { creditLine: credit });
+  effectiveDate.setMonth(effectiveDate.getMonth() + 2);
+  await User.findByIdAndUpdate(id, {
+    creditLine: credit,
+    creditEffectiveDate: effectiveDate,
+  });
 };
