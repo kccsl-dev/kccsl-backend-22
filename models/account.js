@@ -24,7 +24,18 @@ const AccountSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["S", "RDS", "RDM", "RDL", "FDS", "FDM", "FDL", "FIX", "FLEX", "C"],
+      enum: [
+        "S",
+        "RDS",
+        "RDM",
+        "RDL",
+        "FDS",
+        "FDM",
+        "FDL",
+        "FIXED",
+        "FLEX",
+        "C",
+      ],
     },
     credits: { type: [transactionSchema], required: true },
     debits: { type: [transactionSchema], required: true },
@@ -40,6 +51,12 @@ const AccountSchema = new Schema(
     monthlyAmount: { type: Number },
     monthlyDate: { type: String },
     isActive: { type: Boolean, requried: true },
+    status: {
+      type: String,
+      enum: ["PENDING", "APPROVED", "DISBURSED", "REPAID", "DENIED"],
+    },
+    guarenters: { type: [String] },
+    isLoan: { type: Boolean },
   },
   { timestamps: true }
 );

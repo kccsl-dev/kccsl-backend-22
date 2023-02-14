@@ -118,6 +118,8 @@ const userSchema = new Schema(
     bankAccountDetails: { type: bankDetailsSchema },
     nomineeDetails: { type: [nomineeDetailsSchema] },
     mainSavingsAccount: { type: String, required: true },
+    creditLine: { type: Number, required: true, default: 0 },
+    creditEffectiveDate: { type: Date },
     hasBeenActivated: { type: Boolean, required: true },
     shares: { type: [String], required: true },
     shareDetails: { type: [shareSchema] },
@@ -131,6 +133,8 @@ const userSchema = new Schema(
     subMembers: { type: [String] },
     subAccounts: { type: [String] },
     totalIncentive: { type: Number },
+    guarentees: { type: [String] },
+    pendingLoans: { type: [String] },
   },
   { timestamps: true }
 );
