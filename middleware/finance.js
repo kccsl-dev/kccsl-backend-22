@@ -2,6 +2,7 @@ import Account from "../models/account.js";
 import Interest from "../models/interest";
 import Sequence from "../models/sequence.js";
 import Transaction from "../models/transaction.js";
+import user from "../models/user.js";
 import User from "../models/user.js";
 
 export const createAccountUtil = async (accountDetails, id, isLoan) => {
@@ -172,11 +173,14 @@ export const grantCollectionIncentive = async (
   const coordinator = await User.findById(coordinatorId);
   const accountInterest =
     applicableInterest[accountDetails.type + accountDetails.duration];
+  console.log("Interest Rate: ", accountInterest);
   const totalIncentiveRate =
     Math.round((accountInterest / 2) * 100) / 100 / 100;
+  console.log("Total Incentive Rate: ", totalIncentiveRate);
   const totalIncentiveAmount =
     Math.round(accountDetails.principalAmounts[0] * totalIncentiveRate * 100) /
     100;
+  console.log("Total Incentive Amount: ", totalIncentiveAmount);
   console.log(`INCENTIVE: ${totalIncentiveAmount} (@ ${totalIncentiveRate}%)`);
   if (isNaN(totalIncentiveAmount)) {
     throw new Error("Incentive cannot be NaN");
@@ -191,8 +195,8 @@ export const grantCollectionIncentive = async (
       amount = remainder;
     } else {
       amount = Math.round(remainder * 0.7 * 100) / 100;
-      console.log(`Amount: ${amount}, with remainder ${remainder}`);
     }
+    console.log(`Amount: ${amount}, with remainder: ${remainder}`);
     remainder = Math.round((remainder - amount) * 100) / 100;
     console.log(`new remainder: ${remainder}`);
 
@@ -239,15 +243,26 @@ export const recalculateCreditLine = async (id) => {
   const loans = accounts.filter(
     (account) => account.isLoan && !invalidLoans.includes(account.status)
   );
-  console.log("236", accounts);
+  console.log("Line-236", accounts);
   console.log("loans", loans);
   loans.forEach((loan) => {
     credit += loan.balance;
   });
   console.log("New credit: ", credit);
   effectiveDate.setMonth(effectiveDate.getMonth() + 2);
+  const member = await user.findById(id);
+  const currectCredit = member.creditLine;
+  console.log("unique", currectCredit);
   await User.findByIdAndUpdate(id, {
     creditLine: credit,
     creditEffectiveDate: effectiveDate,
+  });
+  console.log("updating coordinator credit limit (recalc)");
+  const diff = currectCredit - credit;
+
+  await User.findByIdAndUpdate(member.creatorId, {
+    $inc: {
+      coordinatorCreditLimit: diff * -1,
+    },
   });
 };

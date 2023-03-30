@@ -83,6 +83,11 @@ const nomineeDetailsSchema = new Schema({
   nomineeRelationship: { type: String },
 });
 
+const otpSchema = new Schema({
+  value: { type: String, requried: true },
+  expiry: { type: Date, requried: true },
+});
+
 const shareSchema = {
   datePurchased: { type: Date },
   noOfShares: { type: Number },
@@ -127,6 +132,7 @@ const userSchema = new Schema(
     isPasswordReset: { type: Boolean },
     accounts: { type: [String] },
     collectionAccount: { type: String, requried: true },
+    coordinatorCreditLimit: { type: Number, default: 0 },
     isCoordinator: { type: Boolean },
     converterId: { type: String },
     conversionDate: { type: Date },
@@ -135,6 +141,7 @@ const userSchema = new Schema(
     totalIncentive: { type: Number },
     guarentees: { type: [String] },
     pendingLoans: { type: [String] },
+    otpData: { type: otpSchema },
   },
   { timestamps: true }
 );

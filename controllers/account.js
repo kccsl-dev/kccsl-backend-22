@@ -246,6 +246,7 @@ export const createLoan = async (req, res) => {
         $push: { pendingLoans: newAccount._id },
       }
     );
+    recalculateCreditLine(newAccount.userId);
 
     res.status(200).json(newAccount);
   } catch (error) {

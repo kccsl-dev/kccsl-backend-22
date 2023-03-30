@@ -8,6 +8,7 @@ import {
   createTransactionEntry,
   updateAccountUtil,
 } from "../middleware/finance";
+import { assignAndSendOtp } from "../middleware/auth.js";
 
 export const getUsers = async (req, res) => {
   try {

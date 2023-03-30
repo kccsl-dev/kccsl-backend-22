@@ -1,6 +1,7 @@
 import {
   updateAccountUtil,
   grantCollectionIncentive,
+  recalculateCreditLine,
 } from "../middleware/finance";
 import Account from "../models/account";
 import Transaction from "../models/transaction";
@@ -68,9 +69,7 @@ export const makeTransaction = async (req, res) => {
     console.log("transaction complete");
 
     if (goesToCredit) {
-      await User.findByIdAndUpdate(account.userId, {
-        $inc: { creditLine: amount * 0.7 },
-      });
+      recalculateCreditLine(account.userId);
     }
 
     if (isCollection) {
