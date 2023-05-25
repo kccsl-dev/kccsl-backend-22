@@ -10,7 +10,7 @@ export const transactionSchema = new Schema(
     method: {
       type: String,
       reqruied: true,
-      enum: ["cash", "cheque", "UPI", "internal"],
+      enum: ["cash", "cheque", "UPI", "internal", "upi"],
     },
     proof: { type: String, required: true },
     breakdown: { type: [Object] },
