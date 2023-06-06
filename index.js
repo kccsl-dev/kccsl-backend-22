@@ -8,6 +8,7 @@ import transactionRouter from "./routes/transaction.js";
 import accountRouter from "./routes/account.js";
 import interestRouter from "./routes/interest.js";
 import demandRouter from "./routes/demand.js";
+import depositRouter from "./routes/deposit.js";
 import { GenerateDBs } from "./utils/createData.js";
 import * as dotenv from "dotenv";
 import { SequenceId } from "./utils/createData.js";
@@ -24,6 +25,7 @@ app.use("/account", accountRouter);
 app.use("/transaction", transactionRouter);
 app.use("/interest", interestRouter);
 app.use("/demand", demandRouter);
+app.use("/deposit", depositRouter);
 
 const databaseURI = process.env.DATABASE_URI;
 const PORT = process.env.PORT;
