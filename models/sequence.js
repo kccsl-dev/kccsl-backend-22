@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const sequenceSchema = new Schema(
+const sequenceSchema =  new Schema(
   {
     member: { type: Number, required: true },
     RDS: { type: Number, required: true },
