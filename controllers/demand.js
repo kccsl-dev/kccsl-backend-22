@@ -101,7 +101,7 @@ export const getReportByDate = async (req, res) => {
     for (const member of members) {
       const creator = await User.findById(member.creatorId);
       const final = {
-        "User ID Phone No": member.creatorId,
+        "User ID Phone No": `'${member.creatorId}`,
         "Name of Coordinator":
           creator.personalInfo.firstName +
           " " +
@@ -109,7 +109,7 @@ export const getReportByDate = async (req, res) => {
           " " +
           creator.personalInfo.lastName,
         "Member/Coordinator": "Member",
-        "User ID of New": member._id,
+        "User ID of New": `'${member._id}`,
         "Name of New":
           member.personalInfo.firstName +
           " " +
@@ -124,7 +124,7 @@ export const getReportByDate = async (req, res) => {
     for (const coordinator of coordinators) {
       const converter = await User.findById(coordinator.converterId);
       const final = {
-        "User ID Phone No": coordinator.converterId,
+        "User ID Phone No": `'${coordinator.converterId}`,
         "Name of Coordinator":
           converter.personalInfo.firstName +
           " " +
@@ -132,7 +132,7 @@ export const getReportByDate = async (req, res) => {
           " " +
           converter.personalInfo.lastName,
         "Member/Coordinator": "Coordinator",
-        "User ID of New": coordinator._id,
+        "User ID of New": `'${coordinator._id}`,
         "Name of New":
           coordinator.personalInfo.firstName +
           " " +
