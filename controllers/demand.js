@@ -1,5 +1,7 @@
 import Demand from "../models/demand.js";
 import User from "../models/user.js";
+import Transaction from "../models/transaction.js";
+import Account from "../models/account.js";
 
 export const getDemands = async (req, res) => {
   try {
@@ -73,73 +75,50 @@ export const getDemandsByDate = async (req, res) => {
 
 export const getReportByDate = async (req, res) => {
   try {
+    console.log("Generating Report");
     const { from, to } = req.params;
     const columnNames = [
+      "Date",
       "User ID Phone No",
       "Name of Coordinator",
       "Member/Coordinator",
       "User ID of New",
       "Name of New",
       "Shares Purchased",
+      "Credit/Debit",
+      "Transaction Amount",
+      "Transaction Mehtod",
       "Deposit/Loan Account",
+      "Bank Deposit",
     ];
 
     const newFrom = new Date(from);
     const newTo = new Date(to);
     newTo.setDate(newTo.getDate() + 2);
 
-    const members = await User.find({
+    const transactions = await Transaction.find({
       createdAt: { $gte: newFrom, $lte: newTo },
     });
 
-    const coordinators = await User.find({
-      conversionDate: { $gte: newFrom, $lte: newTo },
-    });
-
     const rows = [];
-
-    for (const member of members) {
-      const creator = await User.findById(member.creatorId);
+    for (const transaction of transactions) {
+      const transactionAccount = await Account.findById(transaction.accountId);
+      const member = await User.findById(transactionAccount.userId);
+      // const isNewMemberCreated = transaction.remark === "Member creation";
       const final = {
-        "User ID Phone No": `'${member.creatorId}`,
-        "Name of Coordinator":
-          creator.personalInfo.firstName +
-          " " +
-          creator.personalInfo.middleName +
-          " " +
-          creator.personalInfo.lastName,
-        "Member/Coordinator": "Member",
-        "User ID of New": `'${member._id}`,
-        "Name of New":
-          member.personalInfo.firstName +
-          " " +
-          member.personalInfo.middleName +
-          " " +
-          member.personalInfo.lastName,
-        "Shares Purchased": member.shares.length,
-      };
-      rows.push(final);
-    }
-
-    for (const coordinator of coordinators) {
-      const converter = await User.findById(coordinator.converterId);
-      const final = {
-        "User ID Phone No": `'${coordinator.converterId}`,
-        "Name of Coordinator":
-          converter.personalInfo.firstName +
-          " " +
-          converter.personalInfo.middleName +
-          " " +
-          converter.personalInfo.lastName,
-        "Member/Coordinator": "Coordinator",
-        "User ID of New": `'${coordinator._id}`,
-        "Name of New":
-          coordinator.personalInfo.firstName +
-          " " +
-          coordinator.personalInfo.middleName +
-          " " +
-          coordinator.personalInfo.lastName,
-        "Shares Purchased": coordinator.shares.length,
+        Date: new Date(transaction.createdAt).toLocaleDateString(),
+        "User ID Phone No": transactionAccount.userId,
+        "Name of Coordinator": transactionAccount.accountHolderDetails.name,
+        "Member/Coordinator": member.isCoordinator ? "Coordinator" : "Member",
+        "User ID of New": "N/A",
+        "Name of New": "N/A",
+        "Shares Purchased": "N/A",
+        "Credit/Debit": transaction.kind,
+        "Transaction Amount": transaction.amount,
+        "Transaction Mehtod": transaction.method,
+        "Deposit/Loan Account": transaction.accountId,
+        "Bank Deposit":
+          transaction.method.toUpperCase() === "UPI" ? true : false,
       };
       rows.push(final);
     }
@@ -148,6 +127,7 @@ export const getReportByDate = async (req, res) => {
       columnNames,
       rows,
     };
+    console.log("Report Sent");
     res.status(200).json(reportData);
   } catch (error) {
     console.log(error);
