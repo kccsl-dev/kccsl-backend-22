@@ -2,6 +2,7 @@ import Demand from "../models/demand.js";
 import User from "../models/user.js";
 import Transaction from "../models/transaction.js";
 import Account from "../models/account.js";
+import account from "../models/account.js";
 
 export const getDemands = async (req, res) => {
   try {
@@ -85,6 +86,8 @@ export const getReportByDate = async (req, res) => {
       "User ID of New",
       "Name of New",
       "Shares Purchased",
+      "Source",
+      "Remark",
       "Credit/Debit",
       "Transaction Amount",
       "Transaction Mehtod",
@@ -103,16 +106,65 @@ export const getReportByDate = async (req, res) => {
     const rows = [];
     for (const transaction of transactions) {
       const transactionAccount = await Account.findById(transaction.accountId);
-      const member = await User.findById(transactionAccount.userId);
-      // const isNewMemberCreated = transaction.remark === "Member creation";
+      const isNewMemberCreated = transaction.remark.includes("created by");
+      const isNewCoordinatorCreated =
+        transaction.remark.includes("Coordinator by");
+
+      let memberOrCoordinator = "N/A";
+      let userIdOfNew = "N/A";
+      let nameOfNew = "N/A";
+
+      if (isNewMemberCreated) {
+        memberOrCoordinator = "Member";
+        if (transaction.remark.includes("UNKNOWN")) {
+          userIdOfNew = "UNKNOWN";
+          nameOfNew = "UNKNOWN";
+        } else {
+          const memberId = transaction.remark.slice(7, 20);
+          const member = await User.findById(memberId);
+          userIdOfNew = member._id;
+          nameOfNew =
+            member.personalInfo.firstName +
+            " " +
+            member.personalInfo.middleName +
+            " " +
+            member.personalInfo.lastName;
+        }
+      } else if (isNewCoordinatorCreated) {
+        memberOrCoordinator = "Coordinator";
+        if (transaction.source.includes("UNKNOWN")) {
+          userIdOfNew = "UNKNOWN";
+          nameOfNew = "UNKNOWN";
+        } else {
+          const coordinatorId = transaction.remark.slice(7, 20);
+          const coordinator = await User.findById(coordinatorId);
+          userIdOfNew = coordinator._id;
+          nameOfNew =
+            coordinator.personalInfo.firstName +
+            " " +
+            coordinator.personalInfo.middleName +
+            " " +
+            coordinator.personalInfo.lastName;
+        }
+      }
+
+      let sharesPurchased = "N/A";
+      if (isNewMemberCreated) {
+        sharesPurchased = (transaction.amount - 10) / 10;
+      } else if (transaction.remark.includes("shares")) {
+        sharesPurchased = transaction.amount / 10;
+      }
+
       const final = {
         Date: new Date(transaction.createdAt).toLocaleDateString(),
         "User ID Phone No": transactionAccount.userId,
         "Name of Coordinator": transactionAccount.accountHolderDetails.name,
-        "Member/Coordinator": member.isCoordinator ? "Coordinator" : "Member",
-        "User ID of New": "",
-        "Name of New": "",
-        "Shares Purchased": "",
+        "Member/Coordinator": memberOrCoordinator,
+        "User ID of New": userIdOfNew,
+        "Name of New": nameOfNew,
+        "Shares Purchased": sharesPurchased,
+        Source: transaction.source,
+        Remark: transaction.remark,
         "Credit/Debit": transaction.kind,
         "Transaction Amount": transaction.amount,
         "Transaction Mehtod": transaction.method,
