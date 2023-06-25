@@ -47,7 +47,7 @@ export const makeTransaction = async (req, res) => {
       accountId,
       remark,
       kind,
-      breakDown,
+      breakdown: breakDown,
       source,
       method,
       proof,
