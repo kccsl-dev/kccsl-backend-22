@@ -1,5 +1,5 @@
 import Account from "../models/account.js";
-import Interest from "../models/interest";
+import Interest from "../models/interest.js";
 import Sequence from "../models/sequence.js";
 import Transaction from "../models/transaction.js";
 import user from "../models/user.js";

@@ -4,12 +4,12 @@ import {
   getAccounts,
   recalculateCreditLine,
   updateAccountUtil,
-} from "../middleware/finance";
+} from "../middleware/finance.js";
 import Account from "../models/account.js";
 import User from "../models/user.js";
-import Sequence from "../models/sequence";
-import Demand from "../models/demand";
-import Guarenter from "../models/guarenter";
+import Sequence from "../models/sequence.js";
+import Demand from "../models/demand.js";
+import Guarenter from "../models/guarenter.js";
 
 export const getMemberAccounts = async (req, res) => {
   try {

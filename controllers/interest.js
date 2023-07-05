@@ -1,6 +1,6 @@
-import { getLatestInterest } from "../middleware/finance";
-import Interest from "../models/interest";
-import { generateInterestDoc } from "../utils/generateInterest";
+import { getLatestInterest } from "../middleware/finance.js";
+import Interest from "../models/interest.js";
+import { generateInterestDoc } from "../utils/generateInterest.js";
 
 export const getCurrentInterest = async (req, res) => {
   try {

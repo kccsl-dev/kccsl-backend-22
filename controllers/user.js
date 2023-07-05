@@ -7,7 +7,7 @@ import {
   createAccountUtil,
   createTransactionEntry,
   updateAccountUtil,
-} from "../middleware/finance";
+} from "../middleware/finance.js";
 import { assignAndSendOtp } from "../middleware/auth.js";
 
 export const getUsers = async (req, res) => {

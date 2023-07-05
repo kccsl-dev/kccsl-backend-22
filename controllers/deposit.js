@@ -1,4 +1,4 @@
-import Deposit from "../models/deposit";
+import Deposit from "../models/deposit.js";
 
 export const getDeposits = async (req, res) => {
   try {

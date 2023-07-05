@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import User from "../models/user";
+import User from "../models/user.js";
 import * as ft from "fast-two-sms";
 
 const auth = async (req, res, next) => {

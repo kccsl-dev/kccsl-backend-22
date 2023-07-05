@@ -14,7 +14,7 @@ import {
   getMemberAccount,
   getMemberAccounts,
   updateAccount,
-} from "../controllers/account";
+} from "../controllers/account.js";
 
 const router = express.Router();
 

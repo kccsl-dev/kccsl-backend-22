@@ -9,7 +9,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": " nodemon --experimental-modules --es-module-specifier-resolution=node"
+    "start": " node index.js --es-module-specifier-resolution=node",
+    "start:dev": " nodemon --experimental-modules --es-module-specifier-resolution=node"
   },
   "author": "",
   "license": "ISC",

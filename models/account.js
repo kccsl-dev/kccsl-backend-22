@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { transactionSchema } from "./transaction";
+import { transactionSchema } from "./transaction.js";
 
 const personalInfoSchema = new Schema({
   name: { type: String, required: true },

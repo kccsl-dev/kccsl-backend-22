@@ -2,10 +2,9 @@ import {
   updateAccountUtil,
   grantCollectionIncentive,
   recalculateCreditLine,
-} from "../middleware/finance";
-import Account from "../models/account";
-import Transaction from "../models/transaction";
-import User from "../models/user";
+} from "../middleware/finance.js";
+import Account from "../models/account.js";
+import Transaction from "../models/transaction.js";
 
 export const makeTransaction = async (req, res) => {
   //TODO: Use createTransactionEntry here

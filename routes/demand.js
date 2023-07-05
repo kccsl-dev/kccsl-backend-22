@@ -6,7 +6,7 @@ import {
   getReportByDate,
   getTodayDemands,
   makeDemand,
-} from "../controllers/demand";
+} from "../controllers/demand.js";
 
 const router = express.Router();
 

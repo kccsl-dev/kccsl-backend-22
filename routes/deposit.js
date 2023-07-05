@@ -5,7 +5,7 @@ import {
   denyDeposit,
   getCoordinatorDeposits,
   getDeposits,
-} from "../controllers/deposit";
+} from "../controllers/deposit.js";
 
 const router = express.Router();
 
