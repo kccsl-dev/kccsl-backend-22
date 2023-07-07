@@ -10,6 +10,7 @@ import {
   getCoordinators,
   getCoordinator,
   resetPassword,
+  checkOldMember,
 } from "../controllers/user.js";
 import auth from "../middleware/auth.js";
 
@@ -18,6 +19,7 @@ const router = express.Router();
 router.get("/", getUsers);
 router.get("/member/:id", getUser);
 router.get("/checkid/:id", checkId);
+router.get("/checkOldMember/:memberId", checkOldMember);
 router.get("/coordinators", getCoordinators);
 router.get("/coordinator/:id", getCoordinator);
 router.post("/create", createUser);

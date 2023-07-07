@@ -9,6 +9,7 @@ import {
   updateAccountUtil,
 } from "../middleware/finance.js";
 import { assignAndSendOtp } from "../middleware/auth.js";
+import OldMember from "../models/oldMember.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -367,5 +368,16 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(400).json(error);
+  }
+};
+
+export const checkOldMember = async (req, res) => {
+  try {
+    const { memberId } = req.params;
+    const oldMember = await OldMember.findById(memberId);
+    res.status(200).json(oldMember);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error.message);
   }
 };
