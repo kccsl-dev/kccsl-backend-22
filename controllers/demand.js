@@ -80,6 +80,7 @@ export const getReportByDate = async (req, res) => {
     const { from, to } = req.params;
     const columnNames = [
       "Date",
+      "TransactionId",
       "User ID Phone No",
       "Name of Coordinator",
       "Member/Coordinator",
@@ -157,6 +158,7 @@ export const getReportByDate = async (req, res) => {
 
       const final = {
         Date: new Date(transaction.createdAt).toLocaleDateString(),
+        TransactionId: transaction._id,
         "User ID Phone No": transactionAccount.userId,
         "Name of Coordinator": transactionAccount.accountHolderDetails.name,
         "Member/Coordinator": memberOrCoordinator,
