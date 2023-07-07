@@ -38,7 +38,7 @@ mongoose
     GenerateDBs()
       .then(() => {
         app.listen(PORT, () => console.log(`Server running: ${PORT}`));
-        WriteOldMembersData();
+        // WriteOldMembersData();
       })
       .catch((error) => console.log(27, error.message));
   })
