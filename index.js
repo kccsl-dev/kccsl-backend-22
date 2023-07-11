@@ -12,7 +12,10 @@ import depositRouter from "./routes/deposit.js";
 import { GenerateDBs } from "./utils/createData.js";
 import * as dotenv from "dotenv";
 import { SequenceId } from "./utils/createData.js";
-import { WriteOldMembersData } from "./data/addOldMembersData.js";
+import {
+  WriteOldMembersData,
+  deleteTransactions,
+} from "./data/addOldMembersData.js";
 dotenv.config();
 const app = express();
 
@@ -39,6 +42,7 @@ mongoose
       .then(() => {
         app.listen(PORT, () => console.log(`Server running: ${PORT}`));
         // WriteOldMembersData();
+        // deleteTransactions();
       })
       .catch((error) => console.log(27, error.message));
   })

@@ -142,6 +142,7 @@ const userSchema = new Schema(
     guarentees: { type: [String] },
     pendingLoans: { type: [String] },
     otpData: { type: otpSchema },
+    mid: { type: String, required: false },
   },
   { timestamps: true }
 );

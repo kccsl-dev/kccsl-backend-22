@@ -1,6 +1,7 @@
 import OldMember from "../models/oldMember.js";
 import Fs from "fs";
 import Readline from "readline";
+import Transaction from "../models/transaction.js";
 
 export const WriteOldMembersData = async () => {
   const fileStream = Fs.createReadStream("./data/old_members_data.csv");
@@ -35,4 +36,34 @@ export const WriteOldMembersData = async () => {
     await OldMember.insertMany(docs);
     console.log("Old Members Data Created");
   });
+};
+
+export const deleteTransactions = () => {
+  try {
+    const fileStream = Fs.createReadStream("./data/transactions_to_delete.csv");
+    const lineReader = Readline.createInterface({
+      input: fileStream,
+      terminal: false,
+    });
+
+    const docs = [];
+    lineReader.on("line", (line) => {
+      docs.push(line);
+    });
+
+    lineReader.on("close", async () => {
+      console.log("Soft deleting transactions...");
+      console.log(docs);
+      for (const id of docs) {
+        console.log(id);
+        await Transaction.findByIdAndUpdate(id, {
+          isDeleted: true,
+        });
+      }
+
+      console.log("Complete.");
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };

@@ -15,6 +15,7 @@ export const transactionSchema = new Schema(
     proof: { type: String, required: true },
     breakdown: { type: [Object] },
     accountBalance: { type: Number },
+    isDeleted: { type: Boolean, required: false },
   },
   { timestamps: true }
 );

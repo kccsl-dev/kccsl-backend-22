@@ -266,3 +266,23 @@ export const recalculateCreditLine = async (id) => {
     },
   });
 };
+
+export const reverseTransaction = async (transactionId) => {
+  console.log("Reversing transaction: ", transactionId);
+  const transaction = await Transaction.findByIdAndUpdate(transactionId, {
+    isDeleted: true,
+  });
+  if (transaction === null) {
+    throw new Error("Transaction not found");
+  }
+  const account = await Account.findById(transaction.accountId);
+  const balance = account.balance;
+  let newBalance;
+  if (transaction.kind === "credit") {
+    newBalance = account.balance - transaction.amount;
+  } else if (transaction.kind === "debit") {
+    newBalance = account.balance + transaction.amount;
+  }
+  await Account.findByIdAndUpdate(account._id, { balance: newBalance });
+  console.log("Done");
+};

@@ -2,9 +2,11 @@ import {
   updateAccountUtil,
   grantCollectionIncentive,
   recalculateCreditLine,
+  reverseTransaction,
 } from "../middleware/finance.js";
 import Account from "../models/account.js";
 import Transaction from "../models/transaction.js";
+import User from "../models/user.js";
 
 export const makeTransaction = async (req, res) => {
   //TODO: Use createTransactionEntry here
@@ -77,6 +79,35 @@ export const makeTransaction = async (req, res) => {
     }
 
     res.status(200).json(newTransaction);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: error });
+  }
+};
+
+export const reverseCoordinatorSecurity = async (req, res) => {
+  try {
+    const { coordinatorId, mid } = req.body;
+    console.log(coordinatorId, mid);
+    const coordinator = await User.findByIdAndUpdate(coordinatorId, {
+      mid: mid,
+    });
+    const stringToMatch = `${coordinatorId} -> Coordinator by`;
+    const transactions = await Transaction.find({
+      source: {
+        $regex: `\\${coordinatorId} -> Coordinator by`,
+      },
+    });
+    const transaction = transactions[0];
+    await reverseTransaction(transaction._id);
+    const inscentiveTransactions = await Transaction.find({
+      remark: {
+        $regex: `coordinator making incentive \\${coordinatorId}`,
+      },
+    });
+    const inscentiveTransaction = inscentiveTransactions[0];
+    await reverseTransaction(inscentiveTransaction._id);
+    res.status(200).json(coordinator);
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: error });

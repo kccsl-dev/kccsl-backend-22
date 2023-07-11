@@ -100,11 +100,18 @@ export const getReportByDate = async (req, res) => {
     const newTo = new Date(to);
     newTo.setDate(newTo.getDate() + 2);
 
-    const transactions = await Transaction.find({
+    const transactionsRaw = await Transaction.find({
       createdAt: { $gte: newFrom, $lte: newTo },
     });
+    console.log("Filtering Transactions", transactionsRaw.length);
+    const transactions = transactionsRaw.filter(
+      (transaction) => transaction.isDeleted !== true
+    );
+    console.log("Done Filtering Transactions", transactions.length);
 
     const rows = [];
+    let currentUserId;
+    let currentUserName;
     for (const transaction of transactions) {
       const transactionAccount = await Account.findById(transaction.accountId);
       const isNewMemberCreated = transaction.remark.includes("created by");
@@ -130,6 +137,8 @@ export const getReportByDate = async (req, res) => {
             member.personalInfo.middleName +
             " " +
             member.personalInfo.lastName;
+          currentUserId = member._id;
+          currentUserName = nameOfNew;
         }
       } else if (isNewCoordinatorCreated) {
         memberOrCoordinator = "Coordinator";
@@ -146,6 +155,9 @@ export const getReportByDate = async (req, res) => {
             coordinator.personalInfo.middleName +
             " " +
             coordinator.personalInfo.lastName;
+
+          currentUserId = member._id;
+          currentUserName = nameOfNew;
         }
       }
 
@@ -159,11 +171,12 @@ export const getReportByDate = async (req, res) => {
       const final = {
         Date: new Date(transaction.createdAt).toLocaleDateString(),
         TransactionId: transaction._id,
-        "User ID Phone No": transactionAccount.userId,
+        "User ID Phone No": `'${transactionAccount.userId.slice(2)}`,
         "Name of Coordinator": transactionAccount.accountHolderDetails.name,
         "Member/Coordinator": memberOrCoordinator,
-        "User ID of New": userIdOfNew,
-        "Name of New": nameOfNew,
+        "User ID of New":
+          userIdOfNew === "N/A" ? currentUserId : `'${userIdOfNew.slice(2)}`,
+        "Name of New": nameOfNew === "N/A" ? currentUserName : nameOfNew,
         "Shares Purchased": sharesPurchased,
         Source: transaction.source,
         Remark: transaction.remark,
