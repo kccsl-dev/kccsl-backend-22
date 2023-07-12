@@ -10,6 +10,7 @@ import {
 } from "../middleware/finance.js";
 import { assignAndSendOtp } from "../middleware/auth.js";
 import OldMember from "../models/oldMember.js";
+import oldMember from "../models/oldMember.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -376,6 +377,37 @@ export const checkOldMember = async (req, res) => {
     const { memberId } = req.params;
     const oldMember = await OldMember.findById(memberId);
     res.status(200).json(oldMember);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error.message);
+  }
+};
+
+export const getUserByMid = async (req, res) => {
+  try {
+    const { mid } = req.params;
+    const user = await OldMember.findById(mid);
+    if (user === null) {
+      res.status(400).json({ message: "User not found" });
+      return;
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error.message);
+  }
+};
+
+export const updateOldMember = async (req, res) => {
+  try {
+    console.log("Updating old member")
+    const { mid, name } = req.body;
+    const user = await OldMember.findByIdAndUpdate(mid, { name: name });
+    if (user === null) {
+      res.status(400).json({ message: "User not found" });
+      return;
+    }
+    res.status(200).json(user);
   } catch (error) {
     console.log(error);
     res.status(400).json(error.message);
