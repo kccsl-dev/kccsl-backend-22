@@ -31,7 +31,7 @@ app.use("/interest", interestRouter);
 app.use("/demand", demandRouter);
 app.use("/deposit", depositRouter);
 
-const databaseURI = process.env.DATABASE_URI || "mongodb+srv://kccsl:b0dA55XP91dEQ4Pj@cluster0.bu7x3ur.mongodb.net/?retryWrites=true&w=majority";
+const databaseURI = process.env.DATABASE_URI || "mongodb+srv://kccsl:HFlYbeU2IXT2wSVU@cluster0.4tkk2av.mongodb.net/?retryWrites=true&w=majority";
 const PORT = process.env.PORT || "5000";
 console.log(`Starting server on ${PORT}`);
 console.log(`Connecting to DB ${databaseURI}`);
